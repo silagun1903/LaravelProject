@@ -2,107 +2,107 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
     public function index()
     {
-        $cart = session()->get('cart', []);
+        $cartItems = Cart::with('product')
+            ->where('user_id', Auth::id())
+            ->get();
 
-        $total = 0;
+        $total = $cartItems->sum(function ($item) {
+            return $item->price * $item->quantity;
+        });
 
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
-
-        return view('cart.index', compact('cart', 'total'));
+        return view('cart.index', compact('cartItems', 'total'));
     }
 
     public function add(Product $product)
     {
-        $cart = session()->get('cart', []);
+        $cart = Cart::where('user_id', Auth::id())
+            ->where('product_id', $product->id)
+            ->first();
 
-        if (isset($cart[$product->id])) {
-            $cart[$product->id]['quantity']++;
-        } else {
-            $cart[$product->id] = [
-                'name' => $product->name,
-                'image' => $product->image,
+        if ($cart) {
+            $cart->update([
+                'quantity' => $cart->quantity + 1,
                 'price' => $product->price,
+            ]);
+        } else {
+            Cart::create([
+                'user_id' => Auth::id(),
+                'product_id' => $product->id,
                 'quantity' => 1,
-            ];
+                'price' => $product->price,
+            ]);
         }
-
-        session()->put('cart', $cart);
 
         return redirect()->back()->with('success', 'Product added to cart successfully!');
     }
 
     public function increase($id)
     {
-    $cart = session()->get('cart', []);
+        $cart = Cart::where('user_id', Auth::id())->findOrFail($id);
 
-    if (isset($cart[$id])) {
-        $cart[$id]['quantity']++;
-        session()->put('cart', $cart);
+        $cart->update([
+            'quantity' => $cart->quantity + 1,
+        ]);
+
+        return redirect()->back();
     }
 
-    return redirect()->back();
-    }
-
-public function decrease($id)
+    public function decrease($id)
     {
-    $cart = session()->get('cart', []);
+        $cart = Cart::where('user_id', Auth::id())->findOrFail($id);
 
-    if (isset($cart[$id])) {
-        if ($cart[$id]['quantity'] > 1) {
-            $cart[$id]['quantity']--;
+        if ($cart->quantity > 1) {
+            $cart->update([
+                'quantity' => $cart->quantity - 1,
+            ]);
         } else {
-            unset($cart[$id]);
+            $cart->delete();
         }
 
-        session()->put('cart', $cart);
-    }
-
-    return redirect()->back();
+        return redirect()->back();
     }
 
     public function remove($id)
     {
-        $cart = session()->get('cart', []);
+        $cart = Cart::where('user_id', Auth::id())->findOrFail($id);
 
-        if (isset($cart[$id])) {
-            unset($cart[$id]);
-            session()->put('cart', $cart);
-        }
+        $cart->delete();
 
         return redirect()->back()->with('success', 'Product removed from cart.');
     }
 
     public function clear()
     {
-        session()->forget('cart');
+        Cart::where('user_id', Auth::id())->delete();
 
         return redirect()->back()->with('success', 'Cart cleared successfully.');
     }
+
     public function checkout()
     {
-    $cart = session()->get('cart', []);
+        $cartItems = Cart::with('product')
+            ->where('user_id', Auth::id())
+            ->get();
 
-    if (count($cart) === 0) {
-        return redirect()->route('cart.index')->with('success', 'Your cart is empty.');
-    }
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('success', 'Your cart is empty.');
+        }
 
-    $total = 0;
+        $total = $cartItems->sum(function ($item) {
+            return $item->price * $item->quantity;
+        });
 
-    foreach ($cart as $item) {
-        $total += $item['price'] * $item['quantity'];
-    }
+        Cart::where('user_id', Auth::id())->delete();
 
-    session()->forget('cart');
-
-    return view('checkout.success', compact('total'));
+        return view('checkout.success', compact('total'));
     }
 }

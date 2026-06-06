@@ -39,13 +39,15 @@ Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
-Route::post('/cart/increase/{id}', [CartController::class, 'increase'])->name('cart.increase');
-Route::post('/cart/decrease/{id}', [CartController::class, 'decrease'])->name('cart.decrease');
-Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/increase/{id}', [CartController::class, 'increase'])->name('cart.increase');
+    Route::post('/cart/decrease/{id}', [CartController::class, 'decrease'])->name('cart.decrease');
+    Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
+});
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/products', [AdminProductController::class, 'index'])->name('admin.products.index');

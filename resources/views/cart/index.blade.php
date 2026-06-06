@@ -13,9 +13,11 @@
     <div class="logo">Trendora</div>
 
     <nav class="navbar">
-        <a href="/">Home</a>
+        <a href="{{ route('home') }}">Home</a>
         <a href="{{ route('products.index') }}">Products</a>
         <a href="/#categories">Categories</a>
+        <a href="/#contact">Contact</a>
+
         @auth
             @if(Auth::user()->hasRole('admin'))
                 <a href="{{ route('admin.products.index') }}">Admin Panel</a>
@@ -25,6 +27,17 @@
 
     <div class="header-actions">
         <a href="{{ route('cart.index') }}" class="cart-link">Cart</a>
+
+        @auth
+            <span class="user-name">{{ Auth::user()->name }}</span>
+
+            <form action="{{ route('logout') }}" method="POST" class="logout-form">
+                @csrf
+                <button type="submit">Logout</button>
+            </form>
+        @else
+            <a href="{{ route('login') }}" class="cart-link">Login</a>
+        @endauth
     </div>
 </header>
 
@@ -37,36 +50,39 @@
         </div>
     @endif
 
-    @if(count($cart) > 0)
+    @if($cartItems->count() > 0)
         <div class="cart-list">
-            @foreach($cart as $id => $item)
+            @foreach($cartItems as $item)
                 <div class="cart-item">
-                    <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}">
+                    <img src="{{ $item->product->image }}" alt="{{ $item->product->name }}">
 
                     <div class="cart-info">
-                        <h3>{{ $item['name'] }}</h3>
-                        <p>Price: ${{ number_format($item['price'], 2) }}</p>
-<div class="quantity-control">
-    <span>Quantity:</span>
+                        <h3>{{ $item->product->name }}</h3>
 
-    <form action="{{ route('cart.decrease', $id) }}" method="POST">
-        @csrf
-        <button type="submit">-</button>
-    </form>
+                        <p>Price: ${{ number_format($item->price, 2) }}</p>
 
-    <strong>{{ $item['quantity'] }}</strong>
+                        <div class="quantity-control">
+                            <span>Quantity:</span>
 
-    <form action="{{ route('cart.increase', $id) }}" method="POST">
-        @csrf
-        <button type="submit">+</button>
-    </form>
-</div>
+                            <form action="{{ route('cart.decrease', $item->id) }}" method="POST">
+                                @csrf
+                                <button type="submit">-</button>
+                            </form>
+
+                            <strong>{{ $item->quantity }}</strong>
+
+                            <form action="{{ route('cart.increase', $item->id) }}" method="POST">
+                                @csrf
+                                <button type="submit">+</button>
+                            </form>
+                        </div>
+
                         <p class="cart-subtotal">
-                            Subtotal: ${{ number_format($item['price'] * $item['quantity'], 2) }}
+                            Subtotal: ${{ number_format($item->price * $item->quantity, 2) }}
                         </p>
                     </div>
 
-                    <form action="{{ route('cart.remove', $id) }}" method="POST">
+                    <form action="{{ route('cart.remove', $item->id) }}" method="POST">
                         @csrf
                         <button type="submit" class="remove-btn">Remove</button>
                     </form>
@@ -81,15 +97,16 @@
                 @csrf
                 <button type="submit" class="clear-btn">Clear Cart</button>
             </form>
+
             <form action="{{ route('checkout') }}" method="POST">
-    @csrf
-    <button type="submit" class="checkout-btn">Checkout</button>
-</form>
+                @csrf
+                <button type="submit" class="checkout-btn">Checkout</button>
+            </form>
         </div>
     @else
         <div class="empty-cart">
             <h2>Your cart is empty.</h2>
-            <a href="/" class="hero-btn">Continue Shopping</a>
+            <a href="{{ route('products.index') }}" class="hero-btn">Continue Shopping</a>
         </div>
     @endif
 </section>

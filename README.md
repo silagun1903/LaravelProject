@@ -2,7 +2,7 @@ HATİCE SILA GÜN 20222022432
 
 # Trendora - Laravel E-Commerce Project
 
-Trendora is a Laravel-based e-commerce web application developed with PHP, MySQL, Blade, HTML, CSS, and JavaScript. The project includes product listing, product details, shopping cart operations, checkout process, contact section, admin product management, login/logout system, role management, and admin panel protection with middleware.
+Trendora is a Laravel-based e-commerce web application developed with PHP, MySQL, Blade, HTML, CSS, and JavaScript. The project includes product listing, product details, database-based shopping cart operations, checkout process, contact section, admin product management, login/logout system, role management, and admin panel protection with middleware.
 
 ## Technologies Used
 
@@ -24,7 +24,7 @@ Trendora is a Laravel-based e-commerce web application developed with PHP, MySQL
 * Product search by name
 * Product filtering by category
 * Product detail page
-* Shopping cart system using Laravel session
+* Shopping cart system using MySQL database
 * Add products to cart
 * Increase and decrease product quantity in cart
 * Remove products from cart
@@ -111,6 +111,20 @@ Fields:
 * id
 * user_id
 * role_id
+* created_at
+* updated_at
+
+### carts
+
+The `carts` table stores products added to the shopping cart by authenticated users.
+
+Fields:
+
+* id
+* user_id
+* product_id
+* quantity
+* price
 * created_at
 * updated_at
 
@@ -208,7 +222,7 @@ The product detail page displays detailed information about a selected product.
 http://127.0.0.1:8000/cart
 ```
 
-The cart page displays products added to the cart. Users can increase or decrease product quantity, remove products, clear the cart, and continue to checkout.
+The cart page displays products added to the cart. The cart system stores cart records in the MySQL database. Users can increase or decrease product quantity, remove products, clear the cart, and continue to checkout.
 
 ### Login Page
 
@@ -246,10 +260,33 @@ Role-based authorization is implemented with a custom `RoleMiddleware`.
 
 Access rules:
 
-* Guests can view home, products, product details, cart, and login page.
+* Guests can view home, products, product details, and login page.
+* Guests cannot access the cart page.
+* Guests cannot add products to the cart.
 * Guests cannot access the admin panel.
+* Authenticated users can use the cart system.
 * Logged-in users without admin role cannot access the admin panel.
 * Users with admin role can access the admin product management panel.
+
+## Shopping Cart System
+
+The shopping cart system is connected to the MySQL database.
+
+Cart operations:
+
+* Add product to cart
+* Increase product quantity
+* Decrease product quantity
+* Remove product from cart
+* Clear cart
+* View cart total
+
+Each cart item is connected to:
+
+* authenticated user
+* product
+* quantity
+* price
 
 ## Laravel MVC Structure
 
@@ -270,6 +307,7 @@ The project follows Laravel MVC structure:
 * `app/Models/Product.php`
 * `app/Models/User.php`
 * `app/Models/Role.php`
+* `app/Models/Cart.php`
 
 ### Controllers
 
@@ -309,18 +347,17 @@ Example commit progress:
 Add core e-commerce features with product CRUD, cart, checkout, and filters
 Add roles and admin user seeders
 Add login logout and protect admin panel with role middleware
+Add database cart model and cart storage
 ```
 
 ## Planned Next Development
 
-The next development step is to improve the shopping cart and order system with database tables.
+The next development step is to improve the order system with database tables.
 
 Planned features:
 
-* carts table
 * orders table
 * order_items table
-* Cart model
 * Order model
 * OrderItem model
 * OrderController
@@ -330,7 +367,7 @@ Planned features:
 
 ## Project Purpose
 
-The purpose of this project is to demonstrate the development of a Laravel e-commerce website using MVC structure. The project includes routing, database operations, Blade templates, form validation, session-based cart management, authentication, role-based authorization, middleware usage, and admin product management.
+The purpose of this project is to demonstrate the development of a Laravel e-commerce website using MVC structure. The project includes routing, database operations, Blade templates, form validation, database-based cart management, authentication, role-based authorization, middleware usage, and admin product management.
 
 ## Developer
 
