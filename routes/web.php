@@ -40,6 +40,10 @@ Route::get('/products/{product}', function (Product $product) {
 
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+Route::get('/register', [AuthController::class, 'registerForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {

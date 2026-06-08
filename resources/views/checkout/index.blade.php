@@ -20,7 +20,7 @@
 
         @auth
             @if(Auth::user()->hasRole('admin'))
-                <a href="{{ route('admin.products.index') }}">Admin Panel</a>
+                <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
             @endif
         @endauth
     </nav>
