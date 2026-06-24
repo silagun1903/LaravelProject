@@ -1,4 +1,4 @@
-HATİCE SILA GÜN 20222022432
+
 
 # LaravelProject - Trendora E-Commerce Project
 
